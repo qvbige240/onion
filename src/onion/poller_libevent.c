@@ -55,7 +55,7 @@ onion_poller_slot *onion_poller_slot_new(int fd, int (*f) (void *), void *data) 
   ret->fd = fd;
   ret->f = f;
   ret->data = data;
-  ret->type = EV_READ | EV_WRITE | EV_PERSIST;
+  ret->type = EV_READ | EV_PERSIST;
 
   return ret;
 }
@@ -107,8 +107,13 @@ void onion_poller_free(onion_poller * p) {
 
 static void event_callback(evutil_socket_t fd, short evtype, void *e) {
   onion_poller_slot *s = e;
+  if (evtype == EV_TIMEOUT) {
+      ONION_DEBUG("event_callback TIMEOUT(0x%02x)\n", evtype);
+      goto error;
+  }
   int res = s->f(s->data);
   if (res < 0) {
+error:
     onion_poller_slot_free(s);
   }
 }
