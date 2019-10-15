@@ -66,6 +66,10 @@ onion_connection_status onion_handler_handle(onion_handler * handler,
 #endif
       res = handler->handler(handler->priv_data, request, response);
       ONION_DEBUG0("Result: %d", res);
+
+      if (res == OCS_YIELD)
+        return res;
+
       if (res) {
         // write pending data.
         if (!(response->flags & OR_HEADER_SENT)

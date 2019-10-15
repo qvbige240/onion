@@ -16,7 +16,7 @@ SET(ONION_USE_GC true CACHE BOOL "Compile Boehm GC examples")
 SET(ONION_USE_TESTS true CACHE BOOL "Compile the tests")
 SET(ONION_EXAMPLES true CACHE BOOL "Compile the examples")
 SET(ONION_USE_BINDINGS_CPP true CACHE BOOL "Compile the CPP bindings")
-SET(ONION_POLLER default CACHE string "Default poller to use: default | epoll | libev | libevent")
+SET(ONION_POLLER default CACHE STRING "Default poller to use: default | epoll | libev | libevent")
 ########
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules")

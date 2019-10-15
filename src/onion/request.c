@@ -586,7 +586,8 @@ onion_connection_status onion_request_process(onion_request * req) {
     onion_poller *poller =
         onion_get_poller(req->connection.listen_point->server);
     onion_poller_slot *slot = onion_poller_get(poller, req->connection.fd);
-    onion_poller_slot_set_shutdown(slot, NULL, NULL);
+    if (slot)
+      onion_poller_slot_set_shutdown(slot, NULL, NULL);
 
     return hs;
   }
