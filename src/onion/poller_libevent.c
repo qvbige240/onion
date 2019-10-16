@@ -25,6 +25,7 @@
 #include <event2/thread.h>
 #include <stdlib.h>
 #include <semaphore.h>
+#include <pthread.h>
 
 #include "poller.h"
 #include "log.h"
@@ -34,6 +35,15 @@ struct onion_poller_t {
   struct event_base *base;
   sem_t sem;
   volatile int stop;
+
+  int n;
+  //char stop;
+#ifdef HAVE_PTHREADS
+  pthread_mutex_t mutex;
+  //int npollers;
+#endif
+
+  onion_poller_slot *head;
 };
 
 struct onion_poller_slot_t {
@@ -45,6 +55,8 @@ struct onion_poller_slot_t {
   int (*f) (void *);
   void *shutdown_data;
   void (*shutdown) (void *);
+
+  onion_poller_slot *next;
 };
 
 typedef struct onion_poller_slot_t onion_poller_slot;
@@ -121,6 +133,17 @@ error:
 
 /// Adds a slot to the poller
 int onion_poller_add(onion_poller * poller, onion_poller_slot * el) {
+  pthread_mutex_lock(&poller->mutex);
+  // I like head to be always the same, so I do some tricks to keep it. This is beacuse at head normally I have the listen fd, which is very accessed
+  if (!poller->head)
+    poller->head = el;
+  else {
+    el->next = poller->head->next;
+    poller->head->next = el;
+    poller->n++;
+  }
+  pthread_mutex_unlock(&poller->mutex);
+
   el->ev = event_new(poller->base, el->fd, el->type, event_callback, el);
   if (el->timeout > 0) {
     struct timeval tv;
@@ -141,7 +164,12 @@ int onion_poller_remove(onion_poller * poller, int fd) {
 
 /// Gets the poller to do some modifications as change shutdown
 onion_poller_slot *onion_poller_get(onion_poller * poller, int fd) {
-  ONION_ERROR("Not implemented! Use epoll poller.");
+  onion_poller_slot *next = poller->head;
+  while (next) {
+    if (next->fd == fd)
+      return next;
+    next = next->next;
+  }
   return NULL;
 }
 
