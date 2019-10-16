@@ -19,7 +19,7 @@ LIST(APPEND LIBRARIES rt)
 
 # Poller can be a bit more complex, but basically the same.
 if (${ONION_POLLER} STREQUAL libevent)
-	find_package(Libevent COMPONENTS core pthreads REQUIRED)
+	find_package(libevent COMPONENTS core pthreads REQUIRED)
 	LIST(APPEND SOURCES poller_libevent.c)
 	include_directories(${LIBEVENT_INCLUDE_DIRS})
 endif (${ONION_POLLER} STREQUAL libevent)

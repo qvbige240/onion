@@ -34,6 +34,9 @@ message(STATUS "Onion version is ${ONION_VERSION}")
 include_directories (${PROJECT_SOURCE_DIR}/src/)
 include_directories (${PROJECT_BINARY_DIR}/src/)
 
+include_directories ($ENV{DEPEND_PATH}/include)
+#LINK_DIRECTORIES ($ENV{DEPEND_PATH}/lib )
+
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
   SET(ONION_USE_PAM false)
@@ -63,11 +66,18 @@ SET(CMAKE_INSTALL_INCLUDEDIR include/onion)
 ENDIF(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
 
 if (${ONION_POLLER} STREQUAL "default")
-	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	find_package(libevent)
+	if (LIBEVENT_FOUND)
+		set (ONION_POLLER "libevent")
+	else(LIBEVENT_FOUND)
 		set (ONION_POLLER "epoll")
-	else(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-		set (ONION_POLLER "libev")
-	endif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	endif(LIBEVENT_FOUND)
+
+#	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+#		set (ONION_POLLER "epoll")
+#	else(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+#		set (ONION_POLLER "libev")
+#	endif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif (${ONION_POLLER} STREQUAL "default")
 
 message(STATUS "Using ${ONION_POLLER} as poller")
