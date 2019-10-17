@@ -60,6 +60,9 @@ extern "C" {
  */
   struct onion_request_t;
   typedef struct onion_request_t onion_request;
+
+  typedef void (*onion_request_eventcb)(onion_request *req, short event, void *ctx);
+
 /**
  * @struct onion_response_t
  * @short The response

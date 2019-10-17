@@ -548,6 +548,10 @@ const onion_block *onion_request_get_data(onion_request * req) {
   return req->data;
 }
 
+void onion_request_yield_event(onion_request *req) {
+  if (req->eventcb)
+    req->eventcb(req, 0, req->cbarg);
+}
 /**
  * @short Launches one handler for the given request
  * @ingroup request
@@ -587,7 +591,8 @@ onion_connection_status onion_request_process(onion_request * req) {
         onion_get_poller(req->connection.listen_point->server);
     onion_poller_slot *slot = onion_poller_get(poller, req->connection.fd);
     if (slot)
-      onion_poller_slot_set_shutdown(slot, NULL, NULL);
+      onion_poller_slot_set_shutdown(slot, (void *)onion_request_yield_event, req);
+      //onion_poller_slot_set_shutdown(slot, NULL, NULL);
 
     return hs;
   }
@@ -730,4 +735,10 @@ const char *onion_request_get_cookie(onion_request * req,
 /// @ingroup request
 bool onion_request_is_secure(onion_request * req) {
   return req->connection.listen_point->secure;
+}
+
+void onion_request_setcb(onion_request *req, onion_request_eventcb eventcb, void *cbarg)
+{
+    req->eventcb = eventcb;
+    req->cbarg = cbarg;
 }

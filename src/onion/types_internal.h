@@ -110,6 +110,9 @@ extern "C" {
     void *parser_data;          /// Data necesary while parsing, muy be deleted when state changed. At free is simply freed.
     onion_websocket *websocket; /// Websocket handler. 
     onion_ptr_list *free_list;  /// Memory that should be freed when the request finishes. IT allows to have simpler onion_dict, which dont copy/free data, but just splits a long string inplace.
+
+    onion_request_eventcb eventcb;
+    void *cbarg;
   };
 
   struct onion_response_t {

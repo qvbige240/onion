@@ -182,6 +182,9 @@ extern "C" {
 
 /// Determine if the request was sent over a secure listen point
   bool onion_request_is_secure(onion_request * req);
+
+  void onion_request_setcb(onion_request *req, onion_request_eventcb eventcb, void *cbarg);
+
 #ifdef __cplusplus
 }
 #endif
