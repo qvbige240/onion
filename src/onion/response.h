@@ -106,6 +106,7 @@ extern "C" {
                                  const char *value);
 /// Sets the header length. Normally it should be through set_header, but as its very common and needs some procesing here is a shortcut
   void onion_response_set_length(onion_response * res, size_t length);
+  void onion_response_set_length0(onion_response * res);
 /// Sets the return code
   void onion_response_set_code(onion_response * res, int code);
 /// Gets the headers dictionary

@@ -230,6 +230,13 @@ void onion_response_set_length(onion_response * res, size_t len) {
   res->flags |= OR_LENGTH_SET;
 }
 
+void onion_response_set_length0(onion_response *response)
+{
+  // write pending data.
+  if (!(response->flags & OR_HEADER_SENT) && response->buffer_pos < sizeof(response->buffer))
+    onion_response_set_length(response, response->buffer_pos);
+}
+
 /**
  * @short Sets the return code
  * @memberof onion_response_t
