@@ -17,6 +17,9 @@ SET(ONION_USE_TESTS true CACHE BOOL "Compile the tests")
 SET(ONION_EXAMPLES true CACHE BOOL "Compile the examples")
 SET(ONION_USE_BINDINGS_CPP true CACHE BOOL "Compile the CPP bindings")
 SET(ONION_POLLER default CACHE STRING "Default poller to use: default | epoll | libev | libevent")
+
+SET(ONION_USE_ZLOG true CACHE BOOL "Adds support for libzlog")
+SET(ONION_USE_JSON true CACHE BOOL "Adds support for libjansson")
 ########
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules")
@@ -66,7 +69,7 @@ SET(CMAKE_INSTALL_INCLUDEDIR include/onion)
 ENDIF(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
 
 if (${ONION_POLLER} STREQUAL "default")
-	find_package(libevent)
+#	find_package(libevent)
 	if (LIBEVENT_FOUND)
 		set (ONION_POLLER "libevent")
 	else(LIBEVENT_FOUND)
@@ -181,6 +184,27 @@ if (${ONION_USE_GC})
 endif (${ONION_USE_GC})
 
 
+if (${ONION_USE_ZLOG})
+	find_package(zlog)
+	if (ZLOG_FOUND)
+		set(ZLOG_ENABLED true)
+		message(STATUS "libzlog found. zlog support is compiled in at smp.")
+	else (ZLOG_FOUND)
+		message("libzlog not found. No zlog support.")
+	endif (ZLOG_FOUND)
+endif (${ONION_USE_ZLOG})
+
+if (${ONION_USE_JSON})
+	find_package(jansson)
+	if (JSON_FOUND)
+		set(JSON_ENABLED true)
+		message(STATUS "libjansson found. jansson support is compiled in at smp.")
+	else (JSON_FOUND)
+		message("libjansson not found. No jansson support.")
+	endif (JSON_FOUND)
+endif (${ONION_USE_JSON})
+
+
 find_package(CURL)
 if(CURL_FOUND)
 	message(STATUS "Some extra test are compiled.")
@@ -245,6 +269,9 @@ if(JPEG_ENABLED)
 	add_definitions(-DJPEG_ENABLED)
 endif(JPEG_ENABLED)
 
+if (ZLOG_ENABLED)
+	add_definitions(-DUSE_ZLOG)
+endif(ZLOG_ENABLED)
 
 add_definitions(-DONION_VERSION="${ONION_VERSION}")
 
