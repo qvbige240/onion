@@ -54,6 +54,12 @@ void free_reqres(reqres_t * rr) {
   onion_low_free(rr);
 }
 
+bool free_reqn(int *n, reqres_t * reqres) {
+  free_reqres(reqres);
+  ONION_INFO("Closed connection.");
+  return true;
+}
+
 bool print_reqn(int *n, reqres_t * reqres) {
   ONION_INFO("Writing %d to %p", *n, reqres->res);
   onion_response_printf(reqres->res, "%d\n", *n);
@@ -78,6 +84,25 @@ void long_process(void *request_list_v) {
         onion_ptr_list_filter(request_list->reqres, (void *)print_reqn, &n);
     pthread_mutex_unlock(&request_list->lock);
   }
+
+  pthread_mutex_lock(&request_list->lock);
+  request_list->reqres =
+    onion_ptr_list_filter(request_list->reqres, (void *)free_reqn, &n);
+  pthread_mutex_unlock(&request_list->lock);
+}
+
+void long_process_stop(void *request_list_v)
+{
+    request_list_t *request_list = request_list_v;
+
+    request_list->running = false;
+}
+static void long_process_eventcb(onion_request *req, short event, void *ctx)
+{
+    // if (event & EOF)
+    // if (event & TIMEOUT)
+    ONION_INFO("=== eventcb TIMEOUT ===");
+    long_process_stop(ctx);
 }
 
 onion_connection_status handler(void *request_list_v, onion_request * req,
@@ -85,6 +110,8 @@ onion_connection_status handler(void *request_list_v, onion_request * req,
   // Some hello message
   onion_response_printf(res, "Starting poll\n");
   onion_response_flush(res);
+
+  onion_request_setcb(req, long_process_eventcb, request_list_v);
 
   // Add it to the request_list lists.
   request_list_t *request_list = request_list_v;
