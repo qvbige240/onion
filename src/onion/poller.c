@@ -561,7 +561,7 @@ void onion_poller_poll(onion_poller * p) {
           onion_poller_timer_check(p, el->timeout_limit);
         }
       }
-      if (n < 0) {
+      if (n < 0 && n != OCS_YIELD) {
         onion_poller_remove(p, el->fd);
       } else {
         ONION_DEBUG0("Re setting poller %d", el->fd);
