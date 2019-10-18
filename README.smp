@@ -1,0 +1,3 @@
+export DEPEND_PATH=/home/zouqing/work/carnet/linux/auto/vmp/premake/ubuntu/install
+export DEPEND_PROTOBUF_C_PATH=/home/zouqing/osource/network/pc/final_protobuf
+cmake -DCMAKE_BUILD_TYPE=Debug -DONION_POLLER=libevent ..

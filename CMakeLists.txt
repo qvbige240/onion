@@ -71,7 +71,7 @@ SET(CMAKE_INSTALL_INCLUDEDIR include/onion)
 ENDIF(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
 
 if (${ONION_POLLER} STREQUAL "default")
-#	find_package(libevent)
+	find_package(libevent)
 	if (LIBEVENT_FOUND)
 		set (ONION_POLLER "libevent")
 	else(LIBEVENT_FOUND)
