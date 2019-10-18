@@ -20,6 +20,7 @@ SET(ONION_POLLER default CACHE STRING "Default poller to use: default | epoll | 
 
 SET(ONION_USE_ZLOG true CACHE BOOL "Adds support for libzlog")
 SET(ONION_USE_JSON true CACHE BOOL "Adds support for libjansson")
+SET(ONION_USE_PROTOBUFC true CACHE BOOL "Adds support for libprotobuf-c")
 ########
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules")
@@ -39,6 +40,7 @@ include_directories (${PROJECT_BINARY_DIR}/src/)
 
 include_directories ($ENV{DEPEND_PATH}/include)
 #LINK_DIRECTORIES ($ENV{DEPEND_PATH}/lib )
+include_directories ($ENV{DEPEND_PROTOBUF_C_PATH}/include)
 
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
@@ -204,6 +206,17 @@ if (${ONION_USE_JSON})
 	endif (JSON_FOUND)
 endif (${ONION_USE_JSON})
 
+if (${ONION_USE_PROTOBUFC})
+	find_package(protobuf-c)
+	if (PROTOBUFC_FOUND)
+		set(PROTOBUFC_ENABLED true)
+#		set(PBC_RPC_ENABLED true)
+		message(STATUS "libprotobuf-c found. protobuf-c support is compiled in at smp.")
+	else (PROTOBUFC_FOUND)
+		message("libprotobuf-c not found. No protobuf-c support.")
+	endif (PROTOBUFC_FOUND)
+endif (${ONION_USE_PROTOBUFC})
+
 
 find_package(CURL)
 if(CURL_FOUND)
@@ -272,6 +285,15 @@ endif(JPEG_ENABLED)
 if (ZLOG_ENABLED)
 	add_definitions(-DUSE_ZLOG)
 endif(ZLOG_ENABLED)
+
+if (PROTOBUFC_ENABLED)
+    if (${ONION_POLLER} STREQUAL libevent)
+		add_definitions(-DPBC_RPC_ENABLED)
+		set(PBC_RPC_ENABLED true)
+    else (${ONION_POLLER} STREQUAL libevent)
+		message("PBC_RPC_DISABLED and will not include rpc, Need set ONION_POLLER to libevent.")
+    endif (${ONION_POLLER} STREQUAL libevent)
+endif(PROTOBUFC_ENABLED)
 
 add_definitions(-DONION_VERSION="${ONION_VERSION}")
 
